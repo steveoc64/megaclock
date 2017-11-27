@@ -13,7 +13,7 @@ func redrawThread(c *ui.ClockUI) {
 
 	go func() {
 		for {
-			time.Sleep(time.Second * 10)
+			time.Sleep(time.Second * 1)
 			_, err := glib.IdleAdd(c.Draw)
 			if err != nil {
 				log.Fatal("IdleAdd() failed:", err)

@@ -147,13 +147,13 @@ background-color:grey;
 func (c *ClockUI) Draw() error {
 	t := time.Now()
 
-	t1 := t.UTC()
+	tutc := t.UTC()
 	// c.times["UTC"].SetMarkup(fmt.Sprintf("<span foreground='#53ad95'>%02d:%02d:%02d</span>", t1.Hour(), t1.Minute(), t1.Second()))
-	c.times["UTC"].SetMarkup(fmt.Sprintf("<span font-family='crystal' size='x-large' foreground='#53ad95'>%02d:%02d</span>", t1.Hour(), t1.Minute()))
-	t1 = t.Local()
-	c.times["Local"].SetMarkup(fmt.Sprintf("<span font-family='crystal' size='x-large' foreground='#d6c08b'>%02d:%02d</span>", t1.Hour(), t1.Minute()))
+	c.times["UTC"].SetMarkup(fmt.Sprintf("<span font-family='crystal' size='x-large' foreground='#53ad95'>%02d:%02d</span>", tutc.Hour(), tutc.Minute()))
+	tlocal = t.Local()
+	c.times["Local"].SetMarkup(fmt.Sprintf("<span font-family='crystal' size='x-large' foreground='#d6c08b'>%02d:%02d</span>", tlocal.Hour(), tlocal.Minute()))
 	// c.times["Local"].SetMarkup(fmt.Sprintf("<span foreground='#d6c08b'>%02d:%02d:%02d</span>", t1.Hour(), t1.Minute(), t1.Second()))
-	c.times["Unix"].SetMarkup(fmt.Sprintf("<span font-family='crystal' size='large' foreground='#888888'>%d</span>", t.Unix()))
+	c.times["Unix"].SetMarkup(fmt.Sprintf("<span font-family='crystal' size='large' foreground='#888888'>%d</span>", tutc.Unix()))
 	// c.times["Nano"].SetMarkup(fmt.Sprintf("%d", t.UnixNano()))
 
 	return nil
