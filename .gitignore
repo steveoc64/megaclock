@@ -3,6 +3,7 @@
 *.dll
 *.so
 *.dylib
+megaclock
 
 # Test binary, build with `go test -c`
 *.test
