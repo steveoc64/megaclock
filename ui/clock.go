@@ -91,42 +91,42 @@ func (c *ClockUI) Create() (gtk.IWidget, error) {
 	c.grid.Attach(a, 1, 1, 1, 3)
 
 	// Event handlers
-	a.Connect("draw", func(a *gtk.DrawingArea, ctx *cairo.Context) {
+	a.Connect("draw", func(a *gtk.DrawingArea, cc *cairo.Context) {
 		alloc := c.grid.GetAllocation()
-		// aWidth := float64(alloc.GetWidth())
-		aHeight := float64(alloc.GetHeight())
-		ctx.SetSourceRGBA(1.0, 1.0, 1.0, 0.5)
-		ctx.Arc(aHeight/2, aHeight/2, aHeight/2, 0.0*math.Pi, 2.0*math.Pi)
-		ctx.Fill()
+		h := float64(alloc.GetHeight())
+
+		cc.Scale(h*2, h*2)
+		cc.Translate(h, h)
+		cc.SetLineWidth(2)
+
+		cc.Save()
+
+		// Draw the background
+		cc.SetSourceRGBA(1, 1, 1, 0.5)
+		cc.Arc(1, 1, 1, 0, 2.0*math.Pi)
+		cc.FillPreserve()
+		cc.Restore()
+		cc.Stroke()
 
 		// Local Hour
-		t := time.Now().Local()
-		hLocal := t.Hour()
-		fmt.Println("l is", hLocal)
-		hNth := hLocal % 12
-		fmt.Println("nth is", hNth)
-		hFrac := float64(hNth) / 12.0
-		fmt.Println("each nth is a 12th of a slice of the circle", hFrac)
-		fmt.Println("start radians = ", hFrac*2.0*math.Pi)
+		// t := time.Now().Local()
+		// hLocal := t.Hour()
+		// fmt.Println("l is", hLocal)
+		// hNth := hLocal % 12
+		// fmt.Println("nth is", hNth)
+		// hFrac := float64(hNth) / 12.0
+		// fmt.Println("each nth is a 12th of a slice of the circle", hFrac)
+		// fmt.Println("start radians = ", hFrac*2.0*math.Pi)
 
-		mins := t.Minute()
-		fmt.Println("min is", mins)
-		minFrac := float64(mins) / 60.0
-		fmt.Println("mins is a frac of an hour", minFrac)
-		fmt.Println("end radians = ", minFrac*2.0*math.Pi)
-		ctx.SetSourceRGBA(0, 0, 1, 0.6)
-		ctx.Arc(aHeight/2, aHeight/2, aHeight/2, hFrac*2.0*math.Pi, minFrac*2.0*math.Pi)
-		ctx.Fill()
-
-		// hLocal := ((float64(time.Now().Local().Hour()) - 1.0) / 12.0) * (2.0 * math.Pi)
-		// ctx.SetSourceRGBA(0, 0, 0.5, 0.8)
-		// ctx.Arc(aHeight/2, aHeight/2, aHeight/2, hLocal, hLocal+1)
+		// mins := t.Minute()
+		// fmt.Println("min is", mins)
+		// minFrac := float64(mins) / 60.0
+		// fmt.Println("mins is a frac of an hour", minFrac)
+		// fmt.Println("end radians = ", minFrac*2.0*math.Pi)
+		// ctx.SetSourceRGBA(0, 0, 1, 0.6)
+		// ctx.Arc(aHeight/2, aHeight/2, aHeight/2, hFrac*2.0*math.Pi, minFrac*2.0*math.Pi)
 		// ctx.Fill()
 
-		// hUTC := ((float64(time.Now().UTC().Hour()) - 1) / 12) * (2.0 * math.Pi)
-		// ctx.SetSourceRGBA(0.5, 0, 0, 0.8)
-		// ctx.Arc(aHeight/2, aHeight/2, aHeight/2, hUTC, hUTC+1)
-		// ctx.Fill()
 	})
 
 	// if good, then call the first draw
