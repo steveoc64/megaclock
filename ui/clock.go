@@ -2,8 +2,10 @@ package ui
 
 import (
 	"fmt"
+	"math"
 	"time"
 
+	"github.com/gotk3/gotk3/cairo"
 	"github.com/gotk3/gotk3/gtk"
 )
 
@@ -19,6 +21,7 @@ type ClockUI struct {
 	grid   *gtk.Grid
 	labels map[string]*gtk.Label
 	times  map[string]*gtk.Label
+	analog *gtk.DrawingArea
 }
 
 // NewClockUI is a factory bean pattern constructor generator conveyor belt thing
@@ -43,8 +46,10 @@ func (c *ClockUI) Create() (gtk.IWidget, error) {
 		return nil, err
 	}
 	c.grid = g
+
 	g.SetOrientation(gtk.ORIENTATION_VERTICAL)
-	g.SetColumnSpacing(60)
+	g.SetColumnSpacing(20)
+	g.SetColumnHomogeneous(true)
 
 	row := 1
 	for _, v := range clockUITimes {
@@ -54,26 +59,75 @@ func (c *ClockUI) Create() (gtk.IWidget, error) {
 		}
 
 		l.SetHExpand(true)
+		l.SetHAlign(gtk.ALIGN_FILL)
 		l.SetVExpand(true)
-		l.SetJustify(gtk.JUSTIFY_LEFT)
+		// l.SetJustify(gtk.JUSTIFY_LEFT)
 		c.labels[v] = l
 
-		c.grid.Attach(l, 1, row, 1, 1)
+		c.grid.Attach(l, 2, row, 1, 1)
 
 		t, err := gtk.LabelNew("")
 		if err != nil {
 			return nil, err
 		}
 		t.SetHExpand(true)
+		t.SetHAlign(gtk.ALIGN_FILL)
 		t.SetVExpand(true)
-		t.SetJustify(gtk.JUSTIFY_RIGHT)
-		l.SetName(v)
+		// t.SetJustify(gtk.JUSTIFY_RIGHT)
+		t.SetName(v)
 
 		c.times[v] = t
-		c.grid.Attach(t, 2, row, 1, 1)
+		c.grid.Attach(t, 3, row, 1, 1)
 
 		row++
 	}
+
+	a, err := gtk.DrawingAreaNew()
+	if err != nil {
+		return nil, err
+	}
+
+	c.analog = a
+	c.grid.Attach(a, 1, 1, 1, 3)
+
+	// Event handlers
+	a.Connect("draw", func(a *gtk.DrawingArea, ctx *cairo.Context) {
+		alloc := c.grid.GetAllocation()
+		// aWidth := float64(alloc.GetWidth())
+		aHeight := float64(alloc.GetHeight())
+		ctx.SetSourceRGBA(1.0, 1.0, 1.0, 0.5)
+		ctx.Arc(aHeight/2, aHeight/2, aHeight/2, 0.0*math.Pi, 2.0*math.Pi)
+		ctx.Fill()
+
+		// Local Hour
+		t := time.Now().Local()
+		hLocal := t.Hour()
+		fmt.Println("l is", hLocal)
+		hNth := hLocal % 12
+		fmt.Println("nth is", hNth)
+		hFrac := float64(hNth) / 12.0
+		fmt.Println("each nth is a 12th of a slice of the circle", hFrac)
+		fmt.Println("start radians = ", hFrac*2.0*math.Pi)
+
+		mins := t.Minute()
+		fmt.Println("min is", mins)
+		minFrac := float64(mins) / 60.0
+		fmt.Println("mins is a frac of an hour", minFrac)
+		fmt.Println("end radians = ", minFrac*2.0*math.Pi)
+		ctx.SetSourceRGBA(0, 0, 1, 0.6)
+		ctx.Arc(aHeight/2, aHeight/2, aHeight/2, hFrac*2.0*math.Pi, minFrac*2.0*math.Pi)
+		ctx.Fill()
+
+		// hLocal := ((float64(time.Now().Local().Hour()) - 1.0) / 12.0) * (2.0 * math.Pi)
+		// ctx.SetSourceRGBA(0, 0, 0.5, 0.8)
+		// ctx.Arc(aHeight/2, aHeight/2, aHeight/2, hLocal, hLocal+1)
+		// ctx.Fill()
+
+		// hUTC := ((float64(time.Now().UTC().Hour()) - 1) / 12) * (2.0 * math.Pi)
+		// ctx.SetSourceRGBA(0.5, 0, 0, 0.8)
+		// ctx.Arc(aHeight/2, aHeight/2, aHeight/2, hUTC, hUTC+1)
+		// ctx.Fill()
+	})
 
 	// if good, then call the first draw
 	return c.grid, c.Draw()
@@ -150,12 +204,16 @@ func (c *ClockUI) Draw() error {
 	tutc := t.UTC()
 	// c.times["UTC"].SetMarkup(fmt.Sprintf("<span foreground='#53ad95'>%02d:%02d:%02d</span>", t1.Hour(), t1.Minute(), t1.Second()))
 	c.times["UTC"].SetMarkup(fmt.Sprintf("<span font-family='crystal' size='x-large' foreground='#53ad95'>%02d:%02d</span>", tutc.Hour(), tutc.Minute()))
+
 	tlocal := t.Local()
 	c.times["Local"].SetMarkup(fmt.Sprintf("<span font-family='crystal' size='x-large' foreground='#d6c08b'>%02d:%02d</span>", tlocal.Hour(), tlocal.Minute()))
 	// c.times["Local"].SetMarkup(fmt.Sprintf("<span foreground='#d6c08b'>%02d:%02d:%02d</span>", t1.Hour(), t1.Minute(), t1.Second()))
 	// c.times["Unix"].SetMarkup(fmt.Sprintf("<span font-family='crystal' size='large' foreground='#888888'>%d</span>", tutc.Unix()))
-	c.times["Unix"].SetMarkup(fmt.Sprintf("<span font-family='crystal' size='large' foreground='#888888'>%d</span>", tutc.Unix()))
+
+	c.times["Unix"].SetMarkup(fmt.Sprintf("<span font-family='crystal' size='small' foreground='#888888'>%d</span>", tutc.Unix()))
 	// c.times["Nano"].SetMarkup(fmt.Sprintf("%d", t.UnixNano()))
+
+	c.grid.QueueDraw()
 
 	return nil
 }
