@@ -11,20 +11,15 @@ import (
 func main() {
 	gtk.Init(nil)
 
-	win, err := gtk.WindowNew(gtk.WINDOW_TOPLEVEL)
-	if err != nil {
-		log.Fatal("Unable to create window:", err)
-	}
-	win.Connect("destroy", func() {
-		gtk.MainQuit()
-	})
-
 	clock, err := ui.NewClockUI()
 	if err != nil {
 		log.Fatal("Unable to create Clock UI", err)
 	}
-	win.Add(clock.Widget())
-	win.ShowAll()
+	w := clock.Widget().(*gtk.ApplicationWindow)
+	w.Connect("destroy", func() {
+		gtk.MainQuit()
+	})
+	w.ShowAll()
 
 	redrawThread(clock)
 	gtk.Main()

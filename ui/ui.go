@@ -7,6 +7,6 @@ import (
 // UI interface definition
 type UI interface {
 	Widget() gtk.IWidget
-	Create() (gtk.IWidget, error)
+	Create() error
 	Draw() error
 }
