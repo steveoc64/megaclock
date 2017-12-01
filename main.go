@@ -1,28 +1,21 @@
 package main
 
-// go:generate rice embed-go
+//go:generate rice embed-go
 
 import (
-	"log"
-
 	"github.com/gotk3/gotk3/gtk"
-
-	"github.com/steveoc64/megaclock/ui"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
 	gtk.Init(nil)
 
-	clock, err := ui.NewClockUI()
+	log := logrus.New()
+	clock, err := NewClock(log)
 	if err != nil {
 		log.Fatal("Unable to create Clock UI", err)
 	}
-	w := clock.Widget().(*gtk.ApplicationWindow)
-	w.Connect("destroy", func() {
-		gtk.MainQuit()
-	})
-	w.ShowAll()
+	clock.Start()
 
-	redrawThread(clock)
 	gtk.Main()
 }
